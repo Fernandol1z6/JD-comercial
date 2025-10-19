@@ -90,6 +90,78 @@
 
         // Chama a função handleScroll uma vez na carga da página para elementos já visíveis
         handleScroll();
+        // =================================
+        // 5. CARROSSÉIS
+        // =================================
+        const initCarousel = (container) => {
+            const carousel = container.querySelector('.product-cards-grid, .galaxy-cards-grid');
+            const cards = carousel.children;
+            const prevBtn = container.querySelector('.carousel-button.prev');
+            const nextBtn = container.querySelector('.carousel-button.next');
+
+            // Criar indicadores
+            const indicators = document.createElement('div');
+            indicators.className = 'carousel-indicators';
+            const totalIndicators = Math.ceil(cards.length / 3); // 3 cards visíveis por vez em desktop
+
+            for (let i = 0; i < totalIndicators; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'indicator' + (i === 0 ? ' active' : '');
+                indicators.appendChild(dot);
+            }
+            container.appendChild(indicators);
+
+            // Função para atualizar indicadores
+            const updateIndicators = () => {
+                const scrollPercentage = carousel.scrollLeft / (carousel.scrollWidth - carousel.clientWidth);
+                const activeIndex = Math.round(scrollPercentage * (totalIndicators - 1));
+
+                indicators.querySelectorAll('.indicator').forEach((dot, index) => {
+                    dot.classList.toggle('active', index === activeIndex);
+                });
+            };
+
+            // Handlers de navegação
+            if (prevBtn) prevBtn.addEventListener('click', () => {
+                carousel.scrollBy({
+                    left: -carousel.offsetWidth,
+                    behavior: 'smooth'
+                });
+            });
+
+            if (nextBtn) nextBtn.addEventListener('click', () => {
+                carousel.scrollBy({
+                    left: carousel.offsetWidth,
+                    behavior: 'smooth'
+                });
+            });
+
+            // Atualizar indicadores no scroll
+            carousel.addEventListener('scroll', updateIndicators);
+
+            // Touch scroll support
+            let startX;
+            let scrollLeft;
+
+            carousel.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].pageX - carousel.offsetLeft;
+                scrollLeft = carousel.scrollLeft;
+            });
+
+            carousel.addEventListener('touchmove', (e) => {
+                if (!startX) return;
+                const x = e.touches[0].pageX - carousel.offsetLeft;
+                const walk = (x - startX) * 2;
+                carousel.scrollLeft = scrollLeft - walk;
+            });
+
+            carousel.addEventListener('touchend', () => {
+                startX = null;
+            });
+        };
+
+        // Inicializar todos os carrosséis
+        document.querySelectorAll('.product-carousel-container').forEach(initCarousel);
     });
 
 })();
